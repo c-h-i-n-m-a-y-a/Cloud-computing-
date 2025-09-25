@@ -1,0 +1,371 @@
+import React, { useState } from 'react';
+
+const CCompilerWebsite = () => {
+  const [code, setCode] = useState(`#include <stdio.h>
+
+int main() {
+    printf("Hello, World!\\n");
+    return 0;
+}`);
+  const [output, setOutput] = useState('');
+  const [userRole, setUser Role] = useState<'student' | 'instructor' | 'admin'>('student');
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [activeTab, setActiveTab] = useState<'editor' | 'learn' | 'chinmaya-ai'>('editor');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [isAiThinking, setIsAiThinking] = useState(false);
+
+  const handleCompile = () => {
+    setIsCompiling(true);
+    // Simulate compilation process
+    setTimeout(() => {
+      if (code.includes('printf("Hello, World!\\n")')) {
+        setOutput('Compilation successful!\nHello, World!');
+      } else {
+        setOutput('Compilation successful!\nProgram executed without output.');
+      }
+      setIsCompiling(false);
+    }, 1500);
+  };
+
+  const handleClear = () => {
+    setOutput('');
+  };
+
+  const canEditCode = userRole !== 'student';
+  const canSeeAdvancedFeatures = userRole === 'instructor' || userRole === 'admin';
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header */}
+      <header className="bg-primary text-primary-foreground py-4 px-6 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold">C Compiler Learning Platform</h1>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
+              Role: {userRole}
+            </span>
+            <select
+              value={userRole}
+              onChange={(e) => setUser Role(e.target.value as any)}
+              className="bg-secondary text-secondary-foreground px-3 py-1 rounded border border-border"
+            >
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation */}
+      <nav className="bg-muted border-b border-border">
+        <div className="container mx-auto px-6">
+          <div className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('editor')}
+              className={`py-4 px-2 font-medium ${
+                activeTab === 'editor'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Code Editor
+            </button>
+            <button
+              onClick={() => setActiveTab('learn')}
+              className={`py-4 px-2 font-medium ${
+                activeTab === 'learn'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Learn C
+            </button>
+            {(userRole === 'instructor' || userRole === 'admin') && (
+              <button
+                onClick={() => setActiveTab('chinmaya-ai')}
+                className={`py-4 px-2 font-medium ${
+                  activeTab === 'chinmaya-ai'
+                    ? 'text-primary border-b-2 border-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Chinmaya AI
+              </button>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-6 py-8">
+        {activeTab === 'editor' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Code Editor */}
+            <div className="bg-card text-card-foreground rounded-lg shadow-sm border border-border">
+              <div className="px-6 py-4 border-b border-border">
+                <h2 className="text-lg font-semibold">C Code Editor</h2>
+              </div>
+              <div className="p-6">
+                <textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  disabled={!canEditCode}
+                  className={`w-full h-96 font-mono text-sm p-4 rounded border ${
+                    !canEditCode
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-background text-foreground border-border'
+                  }`}
+                  placeholder="Enter your C code here..."
+                />
+                <div className="flex space-x-4 mt-4">
+                  <button
+                    onClick={handleCompile}
+                    disabled={isCompiling || !canEditCode}
+                    className={`px-6 py-2 rounded font-medium ${
+                      isCompiling || !canEditCode
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    }`}
+                  >
+                    {isCompiling ? 'Compiling...' : 'Compile & Run'}
+                  </button>
+                  <button
+                    onClick={() => setCode(`#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`)}
+                    disabled={!canEditCode}
+                    className={`px-4 py-2 rounded border border-border ${
+                      !canEditCode
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    Reset
+                  </button>
+                </div>
+                {!canEditCode && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Students cannot edit code in this demo mode.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Output */}
+            <div className="bg-card text-card-foreground rounded-lg shadow-sm border border-border">
+              <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Output</h2>
+                <button
+                  onClick={handleClear}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="p-6">
+                <pre className="bg-muted text-muted-foreground p-4 rounded font-mono text-sm h-96 overflow-auto">
+                  {output || 'Compile your code to see the output here...'}
+                </pre>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'chinmaya-ai' ? (
+          /* Chinmaya AI Assistant Section - Only for instructors and admin */
+          <div className="bg-card text-card-foreground rounded-lg shadow-sm border border-border p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-xl">🤖</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Chinmaya AI Assistant</h2>
+                <p className="text-muted-foreground">Advanced AI-powered coding assistant</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* AI Input */}
+              <div className="bg-muted p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Ask Chinmaya</h3>
+                <p className="text-muted-foreground mb-4">
+                  Get AI-powered help with your C programming questions, code explanations, and debugging.
+                </p>
+                
+                <textarea
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Ask me anything about C programming, code optimization, or debugging..."
+                  className="w-full h-48 p-4 rounded border border-border bg-background text-foreground font-mono text-sm"
+                />
+                
+                <button
+                  onClick={() => {
+                    setIsAiThinking(true);
+                    setTimeout(() => {
+                      if (aiPrompt.toLowerCase().includes('hello') || aiPrompt.toLowerCase().includes('hi')) {
+                        setAiResponse(`Hello! I'm Chinmaya, your AI programming assistant. How can I help you with C programming today?`);
+                      } else if (aiPrompt.toLowerCase().includes('pointer')) {
+                        setAiResponse(`Pointers in C are variables that store memory addresses. They're fundamental for:\n\n- Dynamic memory allocation (malloc, calloc)\n- Array manipulation\n- Function parameter passing\n- Data structures like linked lists\n\nExample:\nint x = 10;\nint *ptr = &x;\nprintf("%d", *ptr); // Output: 10`);
+                      } else if (aiPrompt.toLowerCase().includes('struct')) {
+                        setAiResponse(`Structures in C allow you to create custom data types:\n\ntypedef struct {\n    char name[50];\n    int age;\n    float salary;\n} Employee;\n\nEmployee emp1;\nstrcpy(emp1.name, "John");\nemp1.age = 30;\nemp1.salary = 50000.0;`);
+                      } else {
+                        setAiResponse(`I've analyzed your C programming question. Based on your code and question, I recommend:\n\n1. Review the memory management for potential leaks\n2. Check pointer arithmetic operations\n3. Verify function return types match expectations\n4. Consider using debugging tools like gdb\n\nWould you like me to generate specific code examples or explain any concept in more detail?`);
+                      }
+                      setIsAiThinking(false);
+                    }, 2000);
+                  }}
+                  disabled={isAiThinking || !aiPrompt.trim()}
+                  className={`mt-4 px-6 py-2 rounded font-medium ${
+                    isAiThinking || !aiPrompt.trim()
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  }`}
+                >
+                  {isAiThinking ? 'Chinmaya is thinking...' : 'Ask Chinmaya'}
+                </button>
+              </div>
+
+              {/* AI Response */}
+              <div className="bg-muted p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Chinmaya's Response</h3>
+                <div className="bg-background p-4 rounded border border-border min-h-48">
+                  {aiResponse ? (
+                    <pre className="whitespace-pre-wrap font-mono text-sm text-foreground">
+                      {aiResponse}
+                    </pre>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Your conversation with Chinmaya AI will appear here. Ask a question to get started!
+                    </p>
+                  )}
+                </div>
+                
+                {aiResponse && (
+                  <div className="mt-4 flex space-x-4">
+                    <button
+                      onClick={() => {
+                        const newCode = code + '\n\n// ' + aiResponse.split('\n')[0];
+                        setCode(newCode);
+                        setActiveTab('editor');
+                      }}
+                      className="px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 text-sm"
+                    >
+                      Apply to Code
+                    </button>
+                    <button
+                      onClick={() => setAiResponse('')}
+                      className="px-4 py-2 bg-muted text-muted-foreground rounded hover:bg-muted/80 text-sm"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {userRole === 'admin' && (
+              <div className="mt-6 p-4 bg-accent/10 border border-accent rounded-lg">
+                <h4 className="font-semibold text-accent-foreground mb-2">Admin AI Controls</h4>
+                <p className="text-sm text-accent-foreground">
+                  Advanced AI model settings and training data configuration available.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Learn C Section */
+          <div className="bg-card text-card-foreground rounded-lg shadow-sm border border-border p-6">
+            <h2 className="text-2xl font-bold mb-6">Learn C Programming</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Basics Card */}
+              <div className="bg-muted p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">C Basics</h3>
+                <p className="text-muted-foreground mb-4">
+                  Learn the fundamentals of C programming including variables, data types, and basic syntax.
+                </p>
+                <img 
+                  src="https://placeholder-image-service.onrender.com/image/300x200?prompt=C programming code example showing variables and data types&id=3ecea7e3-2664-417c-ab41-da39c5d420a8" 
+                  alt="C programming code example showing variables and data types with syntax highlighting"
+                  className="w-full h-48 object-cover rounded mb-3"
+                />
+                <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                  Start Learning
+                </button>
+              </div>
+
+              {/* Functions Card */}
+              <div className="bg-muted p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Functions</h3>
+                <p className="text-muted-foreground mb-4">
+                  Understand how to create and use functions in C for modular programming.
+                </p>
+                <img 
+                  src="https://placeholder-image-service.onrender.com/image/300x200?prompt=C function declaration and definition example&id=4fceb7e3-3664-517c-bc41-ea39c5d521b9" 
+                  alt="C function declaration and definition example with return types and parameters"
+                  className="w-full h-48 object-cover rounded mb-3"
+                />
+                <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                  Explore Functions
+                </button>
+              </div>
+
+              {/* Pointers Card - Only for instructors and admin */}
+              {canSeeAdvancedFeatures && (
+                <div className="bg-muted p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3">Pointers</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Master pointers - one of the most powerful features of the C programming language.
+                  </p>
+                  <img 
+                    src="https://placeholder-image-service.onrender.com/image/300x200?prompt=C pointer arithmetic and memory management diagram&id=5gdec8f4-4775-628d-cd52-fb40c6e632c0" 
+                    alt="Diagram showing C pointer arithmetic and memory management concepts"
+                    className="w-full h-48 object-cover rounded mb-3"
+                  />
+                  <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                    Learn Pointers
+                  </button>
+                </div>
+              )}
+
+              {/* Advanced Topics Card - Only for admin */}
+              {userRole === 'admin' && (
+                <div className="bg-muted p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-3">Advanced Topics</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Explore advanced C concepts like memory management, file I/O, and data structures.
+                  </p>
+                  <img 
+                    src="https://placeholder-image-service.onrender.com/image/300x200?prompt=Advanced C programming concepts with memory allocation and data structures&id=6hefd9g5-5886-739e-de63-gc51d7f743d1" 
+                    alt="Advanced C programming concepts showing memory allocation and data structures implementation"
+                    className="w-full h-48 object-cover rounded mb-3"
+                  />
+                  <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                    Advanced Topics
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!canSeeAdvancedFeatures && (
+              <div className="mt-6 p-4 bg-accent text-accent-foreground rounded-lg">
+                <p className="text-sm">
+                  Upgrade to instructor or admin role to access advanced C programming topics.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="bg-muted border-t border-border py-6 mt-12">
+        <div className="container mx-auto px-6 text-center text-muted-foreground">
+          <p>© 2024 C Compiler Learning Platform. Educational demonstration only.</p>
+          <p className="text-sm mt-2">
+            This is a simulated compiler environment for learning purposes.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default CCompilerWebsite;
